@@ -4,7 +4,9 @@ import subprocess
 import random
 
 # ip_address --> ttl
+client_addr = "0.0.0.0"
 honeypot_addr = "1.1.1.1"
+webserver_addr = "2.2.2.2"
 store = {}
 
 def initial_configure():
@@ -22,10 +24,10 @@ def initial_configure():
     iptables -t nat -A PREROUTING -d 1.1.1.1 -p udp -m udp --dport 1000:65500 -j DNAT --to-destination 2.2.2.2  #udp port range
     iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
     """
-    sp = subprocess.Popen(["iptables", "-A", "FORWARD", "-d", "dest.ip.goes.here", "-i", "enp0s3", "-p", "tcp", "-m", "tcp", "--dport", "1000:65500" , "-j", "ACCEPT"], stdout=subprocess.PIPE)
-    sp = subprocess.Popen(["iptables", "-A", "FORWARD", "-d", "dest.ip.goes.here", "-i", "enp0s3", "-p", "udp", "-m", "udp", "--dport", "1000:65500" , "-j", "ACCEPT"], stdout=subprocess.PIPE)
-    sp = subprocess.Popen(["iptables", "-t", "nat", "-A", "PREROUTING", "-d", "src.ip.goes.here", "-p", "tcp", "-m", "tcp", "--dport", "1000:65500" , "-j", "DNAT", "--to-destination", "dest.ip.goes.here"], stdout=subprocess.PIPE)
-    sp = subprocess.Popen(["iptables", "-t", "nat", "-A", "PREROUTING", "-d", "src.ip.goes.here", "-p", "udp", "-m", "udp", "--dport", "1000:65500" , "-j", "DNAT", "--to-destination", "dest.ip.goes.here"], stdout=subprocess.PIPE)
+    sp = subprocess.Popen(["iptables", "-A", "FORWARD", "-d", honeypot_addr, "-i", "enp0s3", "-p", "tcp", "-m", "tcp", "--dport", "1000:65500" , "-j", "ACCEPT"], stdout=subprocess.PIPE)
+    sp = subprocess.Popen(["iptables", "-A", "FORWARD", "-d", honeypot_addr, "-i", "enp0s3", "-p", "udp", "-m", "udp", "--dport", "1000:65500" , "-j", "ACCEPT"], stdout=subprocess.PIPE)
+    sp = subprocess.Popen(["iptables", "-t", "nat", "-A", "PREROUTING", "-d", client_addr, "-p", "tcp", "-m", "tcp", "--dport", "1000:65500" , "-j", "DNAT", "--to-destination", honeypot_addr], stdout=subprocess.PIPE)
+    sp = subprocess.Popen(["iptables", "-t", "nat", "-A", "PREROUTING", "-d", client_addr, "-p", "udp", "-m", "udp", "--dport", "1000:65500" , "-j", "DNAT", "--to-destination", honeypot_addr], stdout=subprocess.PIPE)
     sp = subprocess.Popen(["iptables", "-t", "nat", "-A", "POSTROUTING", "-o", "enp0s3", "-j", "MASQUERADE"], stdout=subprocess.PIPE)
     output , err = sp.communicate()
     print output
