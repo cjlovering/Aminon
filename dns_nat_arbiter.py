@@ -41,8 +41,8 @@ def approve_ip(private_addr, public_addr, ttl, interface):
     """
     
     # TODO: generalize this for multiple comnads
+    # TODO:? Needs to alter to allow with the allowed TTL and only allow to connect to the given random public IP as a destination ?
     """
-    General allow IP need to alter to allow with specific TTL and only allow to connect to given public IP?
     iptables -A INPUT -s "$BLOCK_THIS_IP" -j ALLOW
     """
     p = subprocess.Popen(["iptables", "-A", "INPUT", "-s", client_addr, "-j", "ALLOW"], stdout=subprocess.PIPE)
