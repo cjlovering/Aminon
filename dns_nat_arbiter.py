@@ -14,7 +14,17 @@ def initial_configure():
     """
     # creates a dict of ip addresses
     
-    # write the pre-routing rule    
+    # write the pre-routing rule
+    """
+    iptables -A FORWARD -d 2.2.2.2 -i eth0 -p tcp -m tcp --dport 1000:65500 -j ACCEPT #forward tcp port range
+    iptables -A FORWARD -d 2.2.2.2 -i eth0 -p udp -m udp --dport 1000:65500 -j ACCEPT #forward udp port range
+    iptables -t nat -A PREROUTING -d 1.1.1.1 -p tcp -m tcp --dport 1000:65500 -j DNAT --to-destination 2.2.2.2  #tcp port range
+    iptables -t nat -A PREROUTING -d 1.1.1.1 -p udp -m udp --dport 1000:65500 -j DNAT --to-destination 2.2.2.2  #udp port range
+    iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+    """
+    sp = subprocess.Popen(["iptables", "-A", "FORWARD", "-d", "dest.ip.goes.here", "-i", "enp0s3", "-p", "tcp", "-m", "tcp", "--dport", "1000:65500" , "-j", "ACCEPT"], stdout=subprocess.PIPE)
+    output , err = sp.communicate()
+    print output
     pass
     
 
