@@ -23,6 +23,10 @@ def initial_configure():
     iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
     """
     sp = subprocess.Popen(["iptables", "-A", "FORWARD", "-d", "dest.ip.goes.here", "-i", "enp0s3", "-p", "tcp", "-m", "tcp", "--dport", "1000:65500" , "-j", "ACCEPT"], stdout=subprocess.PIPE)
+    sp = subprocess.Popen(["iptables", "-A", "FORWARD", "-d", "dest.ip.goes.here", "-i", "enp0s3", "-p", "udp", "-m", "udp", "--dport", "1000:65500" , "-j", "ACCEPT"], stdout=subprocess.PIPE)
+    sp = subprocess.Popen(["iptables", "-t", "nat", "-A", "PREROUTING", "-d", "src.ip.goes.here", "-p", "tcp", "-m", "tcp", "--dport", "1000:65500" , "-j", "DNAT", "--to-destination", "dest.ip.goes.here"], stdout=subprocess.PIPE)
+    sp = subprocess.Popen(["iptables", "-t", "nat", "-A", "PREROUTING", "-d", "src.ip.goes.here", "-p", "udp", "-m", "udp", "--dport", "1000:65500" , "-j", "DNAT", "--to-destination", "dest.ip.goes.here"], stdout=subprocess.PIPE)
+    sp = subprocess.Popen(["iptables", "-t", "nat", "-A", "POSTROUTING", "-o", "enp0s3", "-j", "MASQUERADE"], stdout=subprocess.PIPE)
     output , err = sp.communicate()
     print output
     pass
