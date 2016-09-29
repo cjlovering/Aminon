@@ -16,6 +16,11 @@ def initial_configure():
     writes the pre-routing rule to send the honeypot
     """
     # creates a dict of ip addresses
+
+    # this rule is needed to route dns resp to netfilter q
+    # > sudo iptables -t nat -A PREROUTING -p udp --dport 53 -j NFQUEUE --queue-num 1
+    
+    
     
     # write the pre-routing rule to route everything to the honeypot unless otherwise specified
     """
@@ -32,7 +37,7 @@ def initial_configure():
     sp = subprocess.Popen(["iptables", "-t", "nat", "-A", "POSTROUTING", "-o", interface, "-j", "MASQUERADE"], stdout=subprocess.PIPE)
     output , err = sp.communicate()
     print output
-    pass
+    
     
 
 def approve_ip(private_addr, public_addr, ttl, interface):
