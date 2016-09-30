@@ -50,7 +50,7 @@ def approve_ip(private_addr, public_addr, ttl, interface):
     # TODO: generalize this for multiple comnads
     # TODO:? Needs to alter to allow with the allowed TTL and only allow to connect to the given random public IP as a destination ?
     """
-    iptables -A INPUT -s "$BLOCK_THIS_IP" -j ALLOW
+    iptables -A INPUT -s "ip.to.allow.here" -j ALLOW
     """
     p = subprocess.Popen(["iptables", "-A", "INPUT", "-s", client_addr, "-j", "ALLOW"], stdout=subprocess.PIPE)
     output , err = p.communicate()
