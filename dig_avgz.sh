@@ -14,5 +14,5 @@ done
 
 ##ANS##
 # goo average: 3182/150 = 21.213333333 min: 10 max: 41
-# pi average: 3026/150 = 20.173333333 min: 12 max: 97
-# 8s average: 2793/150 = 18.62 		 min: 14 max: 99
+# pi average: 3026/150 = 20.173333333  min: 12 max: 97
+# 8s average: 2793/150 = 18.62         min: 14 max: 99
