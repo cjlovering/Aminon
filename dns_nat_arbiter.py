@@ -19,6 +19,8 @@ def initial_configure():
 
     # this rule is needed to route dns resp to netfilter q
     # > sudo iptables -t nat -A PREROUTING -p udp --dport 53 -j NFQUEUE --queue-num 1
+    # We don't need sudo as the script will run as sudo python script.py
+    sp = subprocess.Popen(["iptables", "-t", "nat", "-A", "PREROUTING", "-p", "udp", "--dport", "53", "-j", "NFQUEUE" "--queue-num", "1"], stdout=subprocess.PIPE)
     
     
     
