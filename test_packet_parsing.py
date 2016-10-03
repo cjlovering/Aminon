@@ -13,6 +13,7 @@ import socket
 # ip_address --> ttl
 honeypot_addr = "1.1.1.1"
 store = {}
+ip_list = {}
 
 def initial_configure():
     """
@@ -20,10 +21,12 @@ def initial_configure():
     writes the pre-routing rule to send the honeypot
     """
     # creates a dict of ip addresses
-
+    genMatrix = 16**2
+    # In case we want to keep the attempts within the rednet "10.44" begins class A&B sections
+    rand_ipv4 = "10.44." + ".".join(("%d" % random.randint(0, genMatrix) for i in range(2)))
+    #for ip in ip_list:
     # write the pre-routing rule
     pass
-
 
 def test_packet_process(pkt):
     """
