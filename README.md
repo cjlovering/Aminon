@@ -6,16 +6,21 @@ https://www.overleaf.com/5973117gnxtwm#/19840886/
 
 ## Dependencies
 
-Installing and Dependencies for NetfilterQueue
+**Installing and Dependencies for NetfilterQueue**
+
 `
  # sudo apt-get install build-essential python-dev libnetfilter-queue-dev
  # pip install NetfilterQueue 
 `
-Install dpkt to parse dns response
+
+**Install dpkt to parse dns response**
+
 `
  # pip install dpkt
 `
-Intsall scapy to parse packets from NetfilterQueue
+
+**Install scapy to parse packets from NetfilterQueue**
+
 `
  # pip install scapy
 `
