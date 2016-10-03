@@ -13,7 +13,7 @@ import socket
 # ip_address --> ttl
 honeypot_addr = "1.1.1.1"
 store = {}
-ip_list = {}
+ip_list = {} # global dict of randomly generated IPs
 
 def initial_configure():
     """
@@ -21,11 +21,13 @@ def initial_configure():
     writes the pre-routing rule to send the honeypot
     """
     # creates a dict of ip addresses
-    genMatrix = 16**2
+    
+    
+    gen_matrix = 16**2
     # In case we want to keep the attempts within the rednet "10.44" begins class A&B sections
-    rand_ipv4 = "10.44." + ".".join(("%d" % random.randint(0, genMatrix) for i in range(2)))
+    rand_ipv4 = "10.44." + ".".join(("%d" % random.randint(0, gen_matrix) for i in range(2)))
     while rand_ip in ip_list:   # check if rand_ip already exists
-        rand_ip = "10.44." + ".".join(("%d" % random.randint(0, M) for i in range(2)))
+        rand_ip = "10.44." + ".".join(("%d" % random.randint(0, gen_matrix) for i in range(2)))
     ip_list.append(rand_ip)    # if rand_ip isn't in the list add it
     # write the pre-routing rule
     pass
