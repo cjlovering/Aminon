@@ -6,8 +6,10 @@ import pcapy
 from pcapy import *
 from struct import *
 from scapy import *
+from scapy.all import *
 from scapy.layers.inet import IP, TCP
 from dpkt import *
+import dpkt
 import socket
 
 # ip_address --> ttl
@@ -24,24 +26,50 @@ def initial_configure():
     # write the pre-routing rule
     pass
 
-def test_packet_process(pkt):
+def process(packet):
     """
     tests packet processing
+    
+    packet: a pkt from nfqueue, parse it and send mod dns response
     """
-    packet = pkt.get_payload()
-    p = IP(packet)
-    print p[IP].src
+    pkt = IP(packet.get_payload()) #converts the raw packet to a scapy compatible string
+    
+    ip = IP()
+    udp = UDP()
+    ip.src = pkt[IP].dst
+    ip.dst = pkt[IP].src
 
-    pkt.set_payload(str(pkt))
+    udp.sport = pkt[UDP].dport
+    udp.dport = pkt[UDP].sport
 
-    #script_start = time()
-    pkt.accept()
+    # TODP: here we get the new public ip address
+    public_ip = "31.33.7.31"
+    
+    qd = pkt[UDP].payload
+    qname = pkt.getlayer(DNS).qd.qname
+    
+    dns = DNS(id = qd.id, qr = 1, qdcount = 1, ancount = 1, arcount = 1, nscount = 1, rcode = 0)
 
+    # TODO: confirm this works. current an is None typically, it should be priv address
+    private_ip = honeypot_addr
+    if pkt.getlayer(DNS).an is not None:
+        private_ip = pkt.getlayer(DNS).an.rdata
+    
+    dns.qd = qd[DNSQR]
+    dns.an = DNSRR(rrname = qname, ttl = 257540, rdlen = 4, rdata = public_ip)
+    dns.ns = DNSRR(rrname = qname, ttl = 257540, rdlen = 4, rdata = public_ip)
+    dns.ar = DNSRR(rrname = qname, ttl = 257540, rdlen = 4, rdata = public_ip)
+
+    # TODO: write rule to NAT
+    # os.system( "iptables command as a string" )
+    # public_ip --> private_ip
+    send(ip/udp/dns)
+    
 def main():
-    print "starting script...."
+    print "starting script...."    
     initial_configure()
     nfqueue = NetfilterQueue()
-    nfqueue.bind(1, test_packet_process)
+    nfqueue.bind(1, process)
     try:
         nfqueue.run()
     except KeyboardInterrupt:
