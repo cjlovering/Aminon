@@ -24,7 +24,9 @@ def initial_configure():
     genMatrix = 16**2
     # In case we want to keep the attempts within the rednet "10.44" begins class A&B sections
     rand_ipv4 = "10.44." + ".".join(("%d" % random.randint(0, genMatrix) for i in range(2)))
-    #for ip in ip_list:
+    while rand_ip in ip_list:   # check if rand_ip already exists
+        rand_ip = "10.44." + ".".join(("%d" % random.randint(0, M) for i in range(2)))
+    ip_list.append(rand_ip)    # if rand_ip isn't in the list add it
     # write the pre-routing rule
     pass
 
