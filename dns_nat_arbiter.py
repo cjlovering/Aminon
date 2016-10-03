@@ -47,9 +47,13 @@ def initial_configure():
     print output
     
 def gen_rand_ip():
-	rand_ip = "10." + ".".join(("%d" % random.randint(0, 255) for i in range(3)))
+	first_blk = random.randint(0, 255)
+	while first_blk == 10 or first_blk == 192:
+		first_blk = random.randint(0, 255)
+	first_blk = str(first_blk) + "."
+	rand_ip = first_blk + ".".join(("%d" % random.randint(0, 255) for i in range(3)))
 	while rand_ip in ip_list:
-		rand_ip = "10." + ".".join(("%d" % random.randint(0, 255) for i in range(3)))
+		rand_ip = first_blk + ".".join(("%d" % random.randint(0, 255) for i in range(3)))
 	ip_list.append(rand_ip)
 	#print rand_ip
 	#print ip_list
