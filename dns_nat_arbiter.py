@@ -9,6 +9,8 @@ client_addr = "0.0.0.0"
 honeypot_addr = "1.1.1.1"
 webserver_addr = "2.2.2.2"
 store = {}
+ip_list = [] # global dict of randomly generated IPs
+
 
 def initial_configure():
     """
@@ -44,7 +46,13 @@ def initial_configure():
     output , err = sp.communicate()
     print output
     
-    
+def gen_rand_ip():
+    rand_ip = "10." + ".".join(("%d" % random.randint(0, 16**2) for i in range(3)))
+    while rand_ip in ip_list:
+	    rand_ip = "10." + ".".join(("%d" % random.randint(0, 16**2) for i in range(3)))
+    ip_list.append(rand_ip)
+    #print rand_ip
+    #print ip_list
 
 def approve_ip(private_addr, public_addr, ttl, interface):
     """
