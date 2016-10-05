@@ -7,6 +7,7 @@ import random
 interface = "enp0s3"
 client_addr = "0.0.0.0"
 honeypot_addr = "1.1.1.1"
+honey_port = "8088"
 webserver_addr = "2.2.2.2"
 store = {}
 ip_list = [] # global list of randomly generated IPs
@@ -35,6 +36,16 @@ def initial_configure():
     iptables -t nat -A PREROUTING -d 1.1.1.1 -p tcp -m tcp --dport 1000:65500 -j DNAT --to-destination 2.2.2.2  #tcp port range
     iptables -t nat -A PREROUTING -d 1.1.1.1 -p udp -m udp --dport 1000:65500 -j DNAT --to-destination 2.2.2.2  #udp port range
     iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+    
+    ... general iptables ...
+    -t nat/filter/mangle
+    -A append to list -I insert
+    -d destination adress
+    -i input interface (where pkt recv)
+    -o output interface (where pkt sent)
+    • • route from IP:port to another IP:port • •
+    iptables -t nat -A PREROUTING --src $SRC_IP_MASK --dst $DST_IP -p tcp --dport $portNumber -j REDIRECT --to-ports $rediectPort
+    will attempt to update tomo
     """
     sp = subprocess.Popen(["iptables", "-t", "mangle", "-A", "PREROUTING", "-i", interface, "-j", "TTL", "--ttl-set", "64"], stdout=subprocess.PIPE)
     
