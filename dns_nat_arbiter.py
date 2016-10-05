@@ -51,6 +51,7 @@ def gen_rand_ip():
 	while first_blk == 10 or first_blk == 192:
 		first_blk = random.randint(0, 255)
 	first_blk = str(first_blk) + "."
+	# I believe we actually only have a class C liscense ie 10.4.6.5/24 to use as random public facing addresses
 	rand_ip = first_blk + ".".join(("%d" % random.randint(0, 255) for i in range(3)))
 	while rand_ip in ip_list:
 		rand_ip = first_blk + ".".join(("%d" % random.randint(0, 255) for i in range(3)))
