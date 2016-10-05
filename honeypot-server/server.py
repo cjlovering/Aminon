@@ -54,7 +54,7 @@ class Handler(BaseHTTPRequestHandler):
 			question_num = random.randint(0, len(CAPTCHA_QA) - 1)
 			question = CAPTCHA_QA[question_num][0]
 			# Add it to the session store/map
-			session_store[session_id] = question_num
+			session_store[session_id] = (question_num, self.client_address[0])
 			# Generate the output body
 			response_body  = "<h3>" + question  + "</h3>\n"
 			response_body += "<form action='check_solution.html'>\n"
@@ -74,7 +74,8 @@ class Handler(BaseHTTPRequestHandler):
 			# Parse the query parameters 
 			query_params = parse_qs(self.path[len("/check_solution.html") + 1:])
 			if "secret" not in query_params or query_params["secret"][0] not in session_store or \
-			   "solution" not in query_params or query_params["solution"][0] != CAPTCHA_QA[session_store[query_params["secret"][0]]][1]:
+			   "solution" not in query_params or query_params["solution"][0] != CAPTCHA_QA[session_store[query_params["secret"][0]][0]][1] or \
+			   session_store[query_params["secret"][0]][1] != self.client_address[0]:
 				# Form the response leading them back to the home page
 				response_body = "<h3>Wrong answer! Try again.</h3>"
 				response_body += "Click <a href='/'>here</a> to try again"
