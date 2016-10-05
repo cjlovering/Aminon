@@ -6,7 +6,7 @@ import random
 # ip_address --> ttl
 interface = "enp0s3"
 client_addr = "0.0.0.0"
-honeypot_addr = "1.1.1.1"
+honeypot_addr = "10.4.6.4"
 honey_port = "8088"
 webserver_addr = "2.2.2.2"
 store = {}
