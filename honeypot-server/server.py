@@ -2,7 +2,7 @@
 from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 from SocketServer import ThreadingMixIn
 from urlparse import parse_qs
-import threading, os.path, string, random, time
+import threading, os.path, string, random, thread, time
 
 # Some constants
 EXIT_CODE_BAD_CONFIG_FILE = 1
@@ -40,6 +40,10 @@ def read_from_config(file_name="config"):
 def getSessionID():
 	return "".join(random.SystemRandom().choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for _ in range(20)) + "_" + str(int(time.time()))
 
+def log_in_config(txt):
+	with open(env_var["LOG_OUTPUT"], "a") as file:
+		file.write(txt + "\n")
+
 # Web Request Handler
 class Handler(BaseHTTPRequestHandler):
 	def do_GET(self):
@@ -67,6 +71,8 @@ class Handler(BaseHTTPRequestHandler):
 			response_body += "</form>"
 			# Send the response body
 			self.wfile.write(response_body)
+			# Log this event
+			log_in_config("Thread with ID " + str(thread.get_ident()) + " was spawned to serve / to user with a fresh session ID: " + session_id)
 		elif self.path.startswith("/check_solution.html"):
 			self.send_response(200)
 			self.send_header("Content-Type", "text/html")
@@ -81,9 +87,16 @@ class Handler(BaseHTTPRequestHandler):
 				response_body += "Click <a href='/'>here</a> to try again"
 				# Send the response back
 				self.wfile.write(response_body)
+				# Log this event
+				session_id = "an invalid session ID"
+				if "secret" in query_params and query_params["secret"][0] in session_store:
+					session_id = "existing session ID " + query_params["secret"][0]
+				log_in_config("Thread with ID " + str(thread.get_ident()) + " was spawned to serve /check_solution.html to user with " + session_id + ". The user didn't pass the CAPTCHA challenge.")
 			else:
 				# Now, process the user doing well on the Captcha phase
 				self.wfile.write("<h4>You passed!</h4>")
+				# Log this event
+				log_in_config("Thread with ID " + str(thread.get_ident()) + " was spawned to serve /check_solution.html to user with existing session ID " + query_params["secret"][0]  + ". The user passed the CAPTCHA challenge.")
 			# Nonetheless, invalide the session to prevent response brute-forcing
 			if "secret" in query_params and query_params["secret"][0] in session_store:
 				session_store.pop(query_params["secret"][0])
