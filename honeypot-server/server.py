@@ -72,7 +72,7 @@ class Handler(BaseHTTPRequestHandler):
 			# Send the response body
 			self.wfile.write(response_body)
 			# Log this event
-			log_in_config("Thread with ID " + str(thread.get_ident()) + " was spawned to serve / to user with a fresh session ID: " + session_id)
+			log_in_config("Thread with ID " + str(thread.get_ident()) + " was spawned to serve / to user at " + self.client_address[0]  + " with a fresh session ID: " + session_id)
 		elif self.path.startswith("/check_solution.html"):
 			self.send_response(200)
 			self.send_header("Content-Type", "text/html")
@@ -91,12 +91,12 @@ class Handler(BaseHTTPRequestHandler):
 				session_id = "an invalid session ID"
 				if "secret" in query_params and query_params["secret"][0] in session_store:
 					session_id = "existing session ID " + query_params["secret"][0]
-				log_in_config("Thread with ID " + str(thread.get_ident()) + " was spawned to serve /check_solution.html to user with " + session_id + ". The user didn't pass the CAPTCHA challenge.")
+				log_in_config("Thread with ID " + str(thread.get_ident()) + " was spawned to serve /check_solution.html to user at " + self.client_address[0] + " with " + session_id + ". The user didn't pass the CAPTCHA challenge.")
 			else:
 				# Now, process the user doing well on the Captcha phase
 				self.wfile.write("<h4>You passed!</h4>")
 				# Log this event
-				log_in_config("Thread with ID " + str(thread.get_ident()) + " was spawned to serve /check_solution.html to user with existing session ID " + query_params["secret"][0]  + ". The user passed the CAPTCHA challenge.")
+				log_in_config("Thread with ID " + str(thread.get_ident()) + " was spawned to serve /check_solution.html to user " + self.client_address[0] + " with existing session ID " + query_params["secret"][0]  + ". The user passed the CAPTCHA challenge.")
 			# Nonetheless, invalide the session to prevent response brute-forcing
 			if "secret" in query_params and query_params["secret"][0] in session_store:
 				session_store.pop(query_params["secret"][0])
