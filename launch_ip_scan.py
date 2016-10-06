@@ -21,7 +21,7 @@ def start_scan(run_time):
                     for d in range (1,255):
                         try_ip(a, b, c, d)
                         if (time.time()-start_time) >= run_time:
-                            sys.exit()
+                            sys.exit(0)
     restart_scan()
 
 
