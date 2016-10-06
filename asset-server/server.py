@@ -34,12 +34,13 @@ def read_from_config(file_name="config"):
 
 def log_in_config(txt):
 	if "LOG_OUTPUT" not in env_var: return
-	if not os.path.isfile(env_var["LOG_OUTPUT"]):
+	# Else, open the file and write
+	try:
+		with open(env_var["LOG_OUTPUT"], "a") as file:
+			file.write(txt + "\n")
+	except:
 		print "Failed to write to log: ", txt
 		return
-	# Else, open the file and write
-	with open(env_var["LOG_OUTPUT"], "a") as file:
-		file.write(txt + "\n")
 
 # Web Request Handler
 class Handler(BaseHTTPRequestHandler):
