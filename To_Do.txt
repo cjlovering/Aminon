@@ -1,0 +1,16 @@
+Scripts to write:
+-DoS script adaptation - Derek
+-Netfilterqueue packet parsing - Charlie
+-IPtables - Jaco
+-DNS server - Derek
+
+Things to Do:
+- Charlie
+  DNS editing
+- Jaco
+  Nat Editing
+  Update Attack specifics
+- Derek
+  Clean up code snippets
+  Edit report -> update methodology and evaluation criteria
+  
