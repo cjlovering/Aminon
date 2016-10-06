@@ -25,7 +25,7 @@ def start_scan(run_time):
     restart_scan()
 
 
-def __name__=="__main__":
+if __name__=="__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-t',
@@ -35,7 +35,7 @@ def __name__=="__main__":
 
     if args.time:
         run_time = args.time
-    else
+    else:
         run_time = 60
 
     global start_time
