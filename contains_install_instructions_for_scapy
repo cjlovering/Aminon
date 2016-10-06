@@ -1,0 +1,17 @@
+l
+ll
+v .bashrc 
+vim .bashrc 
+vim .profile 
+vim .sudo_as_admin_successful 
+vim .cache/
+exit
+l
+ls
+cd //
+ls
+cd
+ls
+exit
+gcc
+sudo apt install gcc

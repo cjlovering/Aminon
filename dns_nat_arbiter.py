@@ -6,9 +6,12 @@ import random
 # ip_address --> ttl
 interface = "enp0s3"
 client_addr = "0.0.0.0"
-honeypot_addr = "1.1.1.1"
+honeypot_addr = "10.4.6.4"
+honey_port = "8088"
 webserver_addr = "2.2.2.2"
 store = {}
+ip_list = [] # global list of randomly generated IPs
+
 
 def initial_configure():
     """
@@ -33,6 +36,16 @@ def initial_configure():
     iptables -t nat -A PREROUTING -d 1.1.1.1 -p tcp -m tcp --dport 1000:65500 -j DNAT --to-destination 2.2.2.2  #tcp port range
     iptables -t nat -A PREROUTING -d 1.1.1.1 -p udp -m udp --dport 1000:65500 -j DNAT --to-destination 2.2.2.2  #udp port range
     iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+    
+    ... general iptables ...
+    -t nat/filter/mangle
+    -A append to list -I insert
+    -d destination adress
+    -i input interface (where pkt recv)
+    -o output interface (where pkt sent)
+    • • route from IP:port to another IP:port • •
+    iptables -t nat -A PREROUTING --src $SRC_IP_MASK --dst $DST_IP -p tcp --dport $portNumber -j REDIRECT --to-ports $rediectPort
+    will attempt to update tomo
     """
     sp = subprocess.Popen(["iptables", "-t", "mangle", "-A", "PREROUTING", "-i", interface, "-j", "TTL", "--ttl-set", "64"], stdout=subprocess.PIPE)
     
@@ -44,7 +57,18 @@ def initial_configure():
     output , err = sp.communicate()
     print output
     
-    
+def gen_rand_ip():
+	first_blk = random.randint(0, 255)
+	while first_blk == 10 or first_blk == 192:
+		first_blk = random.randint(0, 255)
+	first_blk = str(first_blk) + "."
+	# I believe we actually only have a class C liscense ie 10.4.6.5/24 to use as random public facing addresses
+	rand_ip = first_blk + ".".join(("%d" % random.randint(0, 255) for i in range(3)))
+	while rand_ip in ip_list:
+		rand_ip = first_blk + ".".join(("%d" % random.randint(0, 255) for i in range(3)))
+	ip_list.append(rand_ip)
+	#print rand_ip
+	#print ip_list
 
 def approve_ip(private_addr, public_addr, ttl, interface):
     """
