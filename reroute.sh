@@ -19,7 +19,9 @@ iptables -A INPUT -m state --state NEW -m tcp -p tcp --dport 22 -j ACCEPT
 
 
 # ***** Reroute DNS exceptions to CATSERVER@3:8080 *****                         Currently VB3
-iptables -t nat -A PREROUTING -p tcp --dport 80 -s 10.10.152.106 -j DNAT --to-destination 10.4.6.3:8080
+#iptables -t nat -A PREROUTING -p tcp --dport 80 -s 10.10.152.106 -j DNAT --to-destination 10.4.6.3:8080
+
+
 # ***** Reroute ALL TCP/UDP to HONEY@2:8080 *****                                Currently VB2
 iptables -t nat -A PREROUTING -p tcp --dport 1000:65500 -j DNAT --to-destination 10.4.6.2:8080
 iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 10.4.6.2:8080
