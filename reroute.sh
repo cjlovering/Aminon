@@ -13,6 +13,8 @@ iptables -t nat -X
 # Make sure ssh is not blocked
 #iptables -A INPUT -i lo -j ACCEPT
 iptables -A INPUT -m state --state NEW -m tcp -p tcp --dport 22 -j ACCEPT
+iptables -t nat -A PREROUTING -p udp --dport 53 -j NFQUEUE --queue-num 1
+
 
 
 #************************* PORT FORWARDING WAS ENABLED ****************************************************************************************
