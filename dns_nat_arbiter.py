@@ -5,7 +5,7 @@ import random
 
 # ip_address --> ttl
 interface = "eth0"
-client_addr = "10.4.6.1"
+client_addr = "10.4.6.4"
 honeypot_addr = "10.4.6.2"
 honey_port = "8080"
 webserver_addr = "10.4.6.3"
