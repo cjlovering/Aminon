@@ -1,58 +1,73 @@
 from netfilterqueue import NetfilterQueue
-from time import time
+from scapy.all import *
+import time
 import subprocess
 import random
 
-# ip_address --> ttl
 interface = "eth0"
 client_addr = "10.4.6.4"
 honeypot_addr = "10.4.6.2"
 honey_port = "8080"
 webserver_addr = "10.4.6.3"
-store = {}
+global ip_list
 ip_list = [] # global list of randomly generated IPs
 ttl = 300
 ttl_map = {}
 
     
 def gen_rand_ip():
-    first_blk = random.randint(0, 255)
-    while first_blk == 10 or first_blk == 192:
-	first_blk = random.randint(0, 255)
-    first_blk = str(first_blk) + "."
-    # I believe we actually only have a class C liscense ie 10.4.6.5/24 to use as random public facing addresses
-    rand_ip = first_blk + ".".join(("%d" % random.randint(0, 255) for i in range(3)))
+    """generates an unused random ip in the public address space
+
+    """
+    rand_ip = "10.4.6." + ".".join(("%d" % random.randint(128, 255) for i in range(1)))
     while rand_ip in ip_list:
-	rand_ip = first_blk + ".".join(("%d" % random.randint(0, 255) for i in range(3)))
+    	rand_ip = "10.4.6." + ".".join(("%d" % random.randint(128, 255) for i in range(1)))
     ip_list.append(rand_ip)
+    return rand_ip
 
 def update_ttl_rules():
+    """determines if any of the rules need to be deleted
+
+    """
+    global ip_list
     t = int(time.time())
-    for k, v in ttl_map:
-    	if v - t > ttl:
-	   delete_connection_rule(k[0], k[1], k[2])
-    
-def add_connection_rule(from_ip, private_addr, public_addr):
-    write_iptable_connection_rule(from_ip, private_addr, public_addr, '-A')
+    for k, v in ttl_map.items():
+    	if t - v > ttl:
+	    delete_connection_rule(k[0], k[1], k[2])
+	    ip_list = [x for x in ip_list if x != k[1]]
+            del ttl_map[k]
+            
+def add_connection_rule(src_ip, public_addr, private_addr):
+    """will execute the write iptable connection rule function as a insert
 
-def delete_connection_rule(from_ip, private_addr, public_addr):
-    write_iptable_connection_rule(from_ip, private_addr, public_addr, '-D')
+    """
+    write_iptable_connection_rule(src_ip, public_addr, private_addr, '-I')
 
-def write_iptable_connection_rule(from_ip, private_addr, public_addr, delete_add_mode):
+def delete_connection_rule(src_ip, public_addr, private_addr):
+    """will execute the write iptable connection rule function as a delete
+
     """
-    executes an command line ip tables command to allow connection to the webserver
+    write_iptable_connection_rule(src_ip, public_addr, private_addr, '-D')
+
+def write_iptable_connection_rule(src_ip, public_addr, private_addr, delete_add_mode):
+    """executes an command line ip tables command to allow connection to the webserver
+
+    src_ip {String} - where the packet came from
+    public_ip {String} - where the packet thinks its going
+    private_ip {String} - where the packet will be routed to
+    delete_add_mode {String} - delete or insert
     """
- 
-    """
-    iptables -A INPUT -s "ip.to.allow.here" -j ALLOW
-    """
-    # TODO: set this to the correct rule
-    p = subprocess.Popen(["iptables", delete_add_mode, "INPUT", "-s", client_addr, "-j", "ALLOW"], stdout=subprocess.PIPE)
+
+    p = subprocess.Popen(["iptables", "-t", "nat", delete_add_mode, "PREROUTING", "-p", "tcp", "--dport", "80", "-s", src_ip, "-d", public_addr, "-j", "DNAT", "--to-destination", private_addr+":8080"], stdout=subprocess.PIPE)
     output , err = p.communicate()
-    print output
     
+
+def add_record_ttl_map(client_ip, public_ip, private_ip):
+    ttl_map[(client_ip, public_ip, private_ip)] = time.time()
+
 def dns_nat_arbiter(packet):
-    """
+    """ the core of the capability functionality - parses each incoming packet
+    determines if its a dns response
     writes exception to ip tables
     gets the ttl and puts it into the dict
     """
@@ -62,15 +77,19 @@ def dns_nat_arbiter(packet):
     
     # get ip src and dest of orig packet for building and iptbles
     ip.src = pkt[IP].src
-    ip.dst = pkt[IP].src
+    ip.dst = pkt[IP].dst
+   
+    client_ip = pkt[IP].dst
     
-    # build udp portion of packet (ports)
-    udp.sport = pkt[UDP].dport
-    udp.dport = pkt[UDP].sport
+    # build udp portion of packet (ports) #NOTE: flipflop
+    udp.sport = pkt[UDP].sport
+    udp.dport = pkt[UDP].dport
 
-    # TODO: here we get the new public ip address
+    # check if any ttls are up
     update_ttl_rules()
-    public_ip = '66.66.66.66'  # gen_rand_ip();
+
+    # generate restricted rand ip (in public space)
+    public_ip = '10.4.6.145'  # gen_rand_ip()
     
     # getting details from packet
     qd = pkt[UDP].payload
@@ -80,34 +99,33 @@ def dns_nat_arbiter(packet):
 
     private_ip = honeypot_addr
 
+    # check if the orig pkt has a DNS answer
     if pkt.getlayer(DNS).an is not None:
         qname = pkt.getlayer(DNS).qd.qname
         private_ip = pkt.getlayer(DNS).an.rdata
     else:
-        packet.drop()
+	# packet was not a DNS response
+	packet.accept()
         return
     
-    
-    # TODO: write rule to NAT
-    # add_connection_rule(ip.src, public_ip, private_ip)
+    # write the connection rule: if from the source to the public route to the private
+    if (client_ip, public_ip, private_ip) not in ttl_map:
+	add_connection_rule(client_ip, public_ip, private_ip)
 
+    # add the request to the map
+    add_record_ttl_map(client_ip, public_ip, private_ip)
+       
+    # format dns response
     dns.qd = qd[DNSQR]
     dns.an = DNSRR(rrname = qname, ttl = ttl, rdata = public_ip)
     dns.ns = DNSRR(rrname = qname, ttl = ttl, rdata = public_ip)
     dns.ar = DNSRR(rrname = qname, ttl = ttl, rdata = public_ip)
          
-
-    # save the file
-    ttl_map[(ip.src, private_ip, public_ip)] = int(time.time())
-
     # drop orig packet, and send the new one
     packet.drop()
     send(ip/udp/dns) 
 
-  
-
 def main():
-    initial_configure()
     nfqueue = NetfilterQueue()
     nfqueue.bind(1, dns_nat_arbiter)
     try:
@@ -118,3 +136,4 @@ def main():
     
 if __name__ == "__main__":
     main()
+    
