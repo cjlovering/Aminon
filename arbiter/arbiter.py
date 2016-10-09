@@ -89,7 +89,7 @@ def dns_nat_arbiter(packet):
     update_ttl_rules()
 
     # generate restricted rand ip (in public space)
-    public_ip = '10.4.6.145'  # gen_rand_ip()
+    public_ip = gen_rand_ip()
     
     # getting details from packet
     qd = pkt[UDP].payload
