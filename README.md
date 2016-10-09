@@ -6,6 +6,9 @@ https://www.overleaf.com/5973117gnxtwm#/19840886/
 
 ## Dependencies
 
+This system uses python2.7, bind9, and iptables. 
+
+
 **Installing and Dependencies for NetfilterQueue**
 
 `
