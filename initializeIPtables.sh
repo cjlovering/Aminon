@@ -1,4 +1,3 @@
-
 # !/sh/bin/bash
 #tcpdump port 8080
 #tcpdump -n dst portrange 6550-6556
@@ -9,15 +8,16 @@ iptables -F
 iptables -X
 iptables -t nat -F
 iptables -t nat -X
+iptables -t mangle -F
+iptables -t mangle -X
 
 # Make sure ssh is not blocked
 #iptables -A INPUT -i lo -j ACCEPT
 iptables -A INPUT -m state --state NEW -m tcp -p tcp --dport 22 -j ACCEPT
-iptables -t nat -A PREROUTING -p udp --dport 53 -j NFQUEUE --queue-num 1
+##iptables -t nat -A PREROUTING -p udp --dport 53 -j NFQUEUE --queue-num 1
 
 
-
-#************************* PORT FORWARDING WAS ENABLED ****************************************************************************************
+#************************* PORT FORWARDING WAS ENABLED **************************************************************************************** See fowardport.sh 
 
 
 # ***** Reroute DNS exceptions to CATSERVER@3:8080 *****                         Currently VB3
@@ -33,3 +33,8 @@ iptables -t nat -A PREROUTING -p udp --dport 1000:65500 -j DNAT --to-destination
 
 # MASQ IS LIFE
 iptables -t nat -A POSTROUTING -j MASQUERADE
+iptables -t mangle -A POSTROUTING -p udp --dport 53 -j NFQUEUE --queue-num 1
+
+
+#List our everything
+iptables -L -t nat -nv

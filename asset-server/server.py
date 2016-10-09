@@ -37,7 +37,7 @@ def log_in_config(txt):
 	# Else, open the file and write
 	try:
 		with open(env_var["LOG_OUTPUT"], "a") as file:
-			file.write(txt + "\n")
+			file.write(str(int(time.time())) + ": " + txt + "\n")
 	except:
 		print "Failed to write to log: ", txt
 		return
@@ -47,6 +47,11 @@ class Handler(BaseHTTPRequestHandler):
 	def do_GET(self):
 		# Serve the page accordingly
 		if self.path == "/":
+			# Grab the User-Agent from headers
+			useragent_header = ""
+			if "User-Agent" in self.headers:
+				useragent_header = " User came in with User-Agent: " + self.headers["User-Agent"]
+			# Proceed to send out the response headers
 			self.send_response(200)
 			self.send_header("Content-Type", "text/html")
 			self.end_headers()
@@ -61,8 +66,12 @@ class Handler(BaseHTTPRequestHandler):
 			# Send the response body
 			self.wfile.write(response_body)
 			# Log this event
-			log_in_config("Thread with ID " + str(thread.get_ident()) + " was spawned to serve / to user at " + self.client_address[0] + ".")
+			log_in_config("Thread with ID " + str(thread.get_ident()) + " was spawned to serve / to user at " + self.client_address[0] + "." + useragent_header)
 		elif self.path.endswith(".png"):
+			# Grab the User-Agent from headers
+			useragent_header = ""
+			if "User-Agent" in self.headers:
+				useragent_header = " User came in with User-Agent: " + self.headers["User-Agent"]
 			# Sanitize the path by removing the initial forward-slash (/)
 			self.path = self.path[1:]
 			# Check if the file exists
@@ -72,7 +81,7 @@ class Handler(BaseHTTPRequestHandler):
 				self.end_headers()
 				self.wfile.write("<h4>404 - File Not Found</h4>")
 				# Log this event
-				log_in_config("Thread with ID " + str(thread.get_ident()) + " was spawned to serve /" + self.path + " to user at " + self.client_address[0] + " but the file was not found.")
+				log_in_config("Thread with ID " + str(thread.get_ident()) + " was spawned to serve /" + self.path + " to user at " + self.client_address[0] + " but the file was not found." + useragent_header)
 				# Now, return
 				return
 			# Else, we have the file, read and dump it to the web stream
@@ -82,7 +91,7 @@ class Handler(BaseHTTPRequestHandler):
 			with open(self.path, "rb") as file:
 				self.wfile.write(file.read())
 			# Log this event
-			log_in_config("Thread with ID " + str(thread.get_ident()) + " was spawned to serve /" + self.path + " to user at " + self.client_address[0] + ".")
+			log_in_config("Thread with ID " + str(thread.get_ident()) + " was spawned to serve /" + self.path + " to user at " + self.client_address[0] + "." + useragent_header)
 
 # Threaded Server
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
