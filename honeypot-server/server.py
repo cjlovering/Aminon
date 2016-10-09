@@ -41,14 +41,25 @@ def getSessionID():
 	return "".join(random.SystemRandom().choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for _ in range(20)) + "_" + str(int(time.time()))
 
 def log_in_config(txt):
-	with open(env_var["LOG_OUTPUT"], "a") as file:
-		file.write(txt + "\n")
+	if "LOG_OUTPUT" not in env_var: return
+	# Else, open the file and write
+	try:
+		with open(env_var["LOG_OUTPUT"], "a") as file:
+			file.write(str(int(time.time())) + ": " + txt + "\n")
+	except:
+		print "Failed to write to log: ", txt
+		return
 
 # Web Request Handler
 class Handler(BaseHTTPRequestHandler):
 	def do_GET(self):
 		# Serve the page accordingly
 		if self.path == "/":
+			# Grab the User-Agent from headers
+			useragent_header = ""
+			if "User-Agent" in self.headers:
+				useragent_header = ". User came in with User-Agent: " + self.headers["User-Agent"]
+			# Send the response back
 			self.send_response(200)
 			self.send_header("Content-Type", "text/html")
 			self.end_headers()
@@ -72,8 +83,13 @@ class Handler(BaseHTTPRequestHandler):
 			# Send the response body
 			self.wfile.write(response_body)
 			# Log this event
-			log_in_config("Thread with ID " + str(thread.get_ident()) + " was spawned to serve / to user at " + self.client_address[0]  + " with a fresh session ID: " + session_id)
+			log_in_config("Thread with ID " + str(thread.get_ident()) + " was spawned to serve / to user at " + self.client_address[0]  + " with a fresh session ID: " + session_id + useragent_header)
 		elif self.path.startswith("/check_solution.html"):
+			# Grab the User-Agent from headers
+			useragent_header = ""
+			if "User-Agent" in self.headers:
+				useragent_header = " User can in with User-Agent: " + self.headers["User-Agent"]
+			# Send the response back
 			self.send_response(200)
 			self.send_header("Content-Type", "text/html")
 			self.end_headers()
@@ -91,12 +107,12 @@ class Handler(BaseHTTPRequestHandler):
 				session_id = "an invalid session ID"
 				if "secret" in query_params and query_params["secret"][0] in session_store:
 					session_id = "existing session ID " + query_params["secret"][0]
-				log_in_config("Thread with ID " + str(thread.get_ident()) + " was spawned to serve /check_solution.html to user at " + self.client_address[0] + " with " + session_id + ". The user didn't pass the CAPTCHA challenge.")
+				log_in_config("Thread with ID " + str(thread.get_ident()) + " was spawned to serve /check_solution.html to user at " + self.client_address[0] + " with " + session_id + ". The user didn't pass the CAPTCHA challenge." + useragent_header)
 			else:
 				# Now, process the user doing well on the Captcha phase
 				self.wfile.write("<h4>You passed!</h4>")
 				# Log this event
-				log_in_config("Thread with ID " + str(thread.get_ident()) + " was spawned to serve /check_solution.html to user " + self.client_address[0] + " with existing session ID " + query_params["secret"][0]  + ". The user passed the CAPTCHA challenge.")
+				log_in_config("Thread with ID " + str(thread.get_ident()) + " was spawned to serve /check_solution.html to user " + self.client_address[0] + " with existing session ID " + query_params["secret"][0]  + ". The user passed the CAPTCHA challenge." + useragent_header)
 			# Nonetheless, invalide the session to prevent response brute-forcing
 			if "secret" in query_params and query_params["secret"][0] in session_store:
 				session_store.pop(query_params["secret"][0])
