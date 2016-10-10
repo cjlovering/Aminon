@@ -1,12 +1,9 @@
 # Aminon
 A lightweight DNS-based traffic gatekeeper filter simulation
 
-## Design Document
-https://www.overleaf.com/5973117gnxtwm#/19840886/
-
 ## Dependencies
 
-This system uses python2.7, bind9, and iptables. 
+This system uses python2.7, bind9, and iptables on the machine for the dns/nat. Our setup is further described in the report. 
 
 
 **Installing and Dependencies for NetfilterQueue**
