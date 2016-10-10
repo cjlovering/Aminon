@@ -61,7 +61,7 @@ class Handler(BaseHTTPRequestHandler):
 			response_body += CAT_IMAGES[random.randint(0, len(CAT_IMAGES) - 1)]
 			response_body += "' />\n"
 			response_body += "  <br /><br />"
-			response_body += "  <h3>This is the super-protected asset server!</h3>"
+			response_body += "  <h3>This is the super-protected asset server!</h3>\n"
 			response_body += "</center>\n"
 			# Send the response body
 			self.wfile.write(response_body)

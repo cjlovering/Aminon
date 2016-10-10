@@ -11,7 +11,12 @@ EXIT_CODE_KEYBOARD_INTERRUPT = 0
 # Some CAPTCHA Questions
 CAPTCHA_QA = [
 		("What has spots, lives on a farm, and likes to mo0o0oooOO from dawn till dusk?", "cow"),
-		("What number does the string n!yn resemble? Write the word for the number.", "nine")
+		("What number does the string n!yn resemble? Write the word for the number.", "nine"),
+		("Flower, resting, lawyer, campsite: the word starting with \"c\" is:", "campsite"),
+		("How many colors in the list purple, penguin, blue, white and red? Write the word for the number", "four"),
+		("What is 1 + six? Write the word for the number", "seven"),
+		("Which of sock, library, cake or red is a color?", "red"),
+		("What number is 2nd in th series 35, 19 and thirty two? Enter the number", "19")
 	     ]
 
 # Some global definitions
@@ -76,7 +81,7 @@ class Handler(BaseHTTPRequestHandler):
 			response_body += "  <input type='text' name='solution' />\n"
 			response_body += "  <input type='hidden' name='secret' value='"
 			response_body += session_id
-			response_body += "' />\n"
+			response_body += "' autocomplete='off' />\n"
 			response_body += "  <br />\n"
 			response_body += "  <input type='submit' value='Submit' />\n"
 			response_body += "</form>"
