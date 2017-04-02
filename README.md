@@ -8,19 +8,19 @@ This system uses python2.7, bind9, and iptables on the machine for the dns/nat. 
 
 **Installing and Dependencies for NetfilterQueue**
 
-`
+```{bash}
  # sudo apt-get install build-essential python-dev libnetfilter-queue-dev
  # pip install NetfilterQueue 
-`
+```
 
 **Install dpkt to parse dns response**
 
-`
+```{bash}
  # pip install dpkt
-`
+```
 
 **Install scapy to parse packets from NetfilterQueue**
 
-`
+```{bash}
  # pip install scapy
-`
+```
